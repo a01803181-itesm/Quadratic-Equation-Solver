@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,10 +19,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -34,15 +31,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.quadraticequationsolver.R
 import com.example.quadraticequationsolver.ui.theme.QuadraticEquationSolverTheme
+import com.example.quadraticequationsolver.viewmodel.SolverVM
+import androidx.compose.runtime.collectAsState
+import com.example.quadraticequationsolver.model.Solution
+import kotlin.math.abs
 
 class MainActivity : ComponentActivity() {
+    private val viewModel: SolverVM by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             QuadraticEquationSolverTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    App(modifier = Modifier.padding(innerPadding))
+                    App(viewModel = viewModel, modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -50,8 +52,8 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun App(modifier: Modifier = Modifier) {
-    val coefficients: List<String> = listOf("a", "b", "c")
+fun App(viewModel: SolverVM, modifier: Modifier = Modifier) {
+    val state = viewModel.state.collectAsState()
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -62,22 +64,36 @@ fun App(modifier: Modifier = Modifier) {
         Header(title = "Ecuaciones de segundo grado")
         QuadraticEquation(modifier)
         Column {
-            coefficients.forEach {
-                CoefficientInput(variable = it)
-            }
+            CoefficientInput(
+                variable = "a",
+                value = state.value.coefficients.quadratic,
+                onValueChange = { value: Float -> viewModel.updateQuadraticCoefficient(value) }
+            )
+            CoefficientInput(
+                variable = "b",
+                value = state.value.coefficients.linear,
+                onValueChange = { value: Float -> viewModel.updateLinearCoefficient(value) }
+            )
+            CoefficientInput(
+                variable = "c",
+                value = state.value.coefficients.constant,
+                onValueChange = { value: Float -> viewModel.updateConstantCoefficient(value) }
+            )
         }
-        ButtonSolve()
+        ButtonSolve(viewModel = viewModel)
         Column {
-            SolutionComponent(label = "Raíz 1:")
-            SolutionComponent(label = "Raíz 2:")
+            SolutionComponent(label = "Raíz 1:", state.value.result.x1)
+            SolutionComponent(label = "Raíz 2:", state.value.result.x2)
         }
     }
 }
 
 @Composable
-fun ButtonSolve(modifier: Modifier = Modifier) {
+fun ButtonSolve(viewModel: SolverVM, modifier: Modifier = Modifier) {
+    val state = viewModel.state.collectAsState()
     Button(
-        onClick = { },
+        onClick = { viewModel.solve() },
+        enabled = state.value.coefficients.quadratic != 0f,
         modifier = modifier.padding(all = 16.dp)
     ) {
         Text(text = "Resolver")
@@ -85,8 +101,7 @@ fun ButtonSolve(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SolutionComponent(label: String, modifier: Modifier = Modifier) {
-    var value by remember { mutableStateOf("0") }
+fun SolutionComponent(label: String, solution: Solution, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.padding(all = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -96,17 +111,22 @@ fun SolutionComponent(label: String, modifier: Modifier = Modifier) {
             modifier = modifier.padding(end = 8.dp),
             fontWeight = FontWeight.SemiBold
         )
+        var value: String = "%.2f".format(if (solution.rationalCoefficient != 0f) solution.rationalCoefficient else 0f)
+        if (solution.irrationalCoefficient != 0f) {
+            value += if (solution.irrationalCoefficient > 0) " + " else " - "
+            value += "%.2f".format(abs(solution.irrationalCoefficient))
+            value += "i"
+        }
         TextField(
             value = value,
-            onValueChange = { value = it },
+            onValueChange = { },
             readOnly = true,
         )
     }
 }
 
 @Composable
-fun CoefficientInput(variable: String, modifier: Modifier = Modifier) {
-    var amount by remember { mutableStateOf("0") }
+fun CoefficientInput(variable: String, value: Float, onValueChange: (Float) -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.padding(all = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -117,8 +137,14 @@ fun CoefficientInput(variable: String, modifier: Modifier = Modifier) {
             fontWeight = FontWeight.SemiBold
         )
         TextField(
-            value = amount,
-            onValueChange = { amount = it },
+            value = if (value % 1f == 0f) value.toInt().toString() else value.toString(),
+            onValueChange = {
+                try {
+                    onValueChange(it.toFloat())
+                } catch (_: NumberFormatException) {
+                    onValueChange(0f)
+                }
+            },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
@@ -148,7 +174,8 @@ fun QuadraticEquation(modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
+    val viewModel = SolverVM()
     QuadraticEquationSolverTheme {
-        App()
+        App(viewModel = viewModel)
     }
 }
