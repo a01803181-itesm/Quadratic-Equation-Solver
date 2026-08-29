@@ -1,4 +1,4 @@
-package com.example.quadraticequationsolver
+package com.example.quadraticequationsolver.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
