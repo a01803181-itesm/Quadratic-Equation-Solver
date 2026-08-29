@@ -7,6 +7,13 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 class SolverUnitTest {
+    /**
+     * Tests the [Solver.solve] method for a quadratic equation that results in complex roots.
+     *
+     * This test case uses coefficients (a=10, b=2, c=4) where the discriminant is negative.
+     * It verifies that the solver correctly calculates and separates the rational part (-b / 2a)
+     * and the irrational/imaginary part (sqrt(|D|) / 2a) of the roots.
+     */
     @Test
     fun irrationalCase() {
         val a = 10f
@@ -25,6 +32,12 @@ class SolverUnitTest {
         assertEquals(rationalCoefficient, result.x2.rationalCoefficient)
     }
 
+    /**
+     * Tests the [Solver.solve] method for a quadratic equation that results in real roots.
+     *
+     * This test case uses coefficients (a=2, b=10, c=4) where the discriminant is positive.
+     * It verifies that the solver correctly calculates the two roots as rational numbers
+     */
     @Test
     fun rationalCase() {
         val a = 2f
