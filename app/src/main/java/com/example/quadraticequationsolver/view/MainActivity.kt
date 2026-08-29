@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -52,15 +55,23 @@ fun App(modifier: Modifier = Modifier) {
     val coefficients: List<String> = listOf("a", "b", "c")
     Column(
         modifier = modifier
+            .fillMaxSize()
+            .padding(all = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         Header(title = "Ecuaciones de segundo grado")
-        QuadraticEquation()
-        coefficients.forEach {
-            CoefficientInput(variable = it)
+        QuadraticEquation(modifier)
+        Column {
+            coefficients.forEach {
+                CoefficientInput(variable = it)
+            }
         }
         ButtonSolve()
-        SolutionComponent(label = "Raíz 1:")
-        SolutionComponent(label = "Raíz 2:")
+        Column {
+            SolutionComponent(label = "Raíz 1:")
+            SolutionComponent(label = "Raíz 2:")
+        }
     }
 }
 
@@ -68,7 +79,7 @@ fun App(modifier: Modifier = Modifier) {
 fun ButtonSolve(modifier: Modifier = Modifier) {
     Button(
         onClick = { },
-        modifier = modifier
+        modifier = modifier.padding(all = 16.dp)
     ) {
         Text(text = "Resolver")
     }
@@ -78,9 +89,14 @@ fun ButtonSolve(modifier: Modifier = Modifier) {
 fun SolutionComponent(label: String, modifier: Modifier = Modifier) {
     var value by remember { mutableStateOf("0") }
     Row(
-        modifier = modifier
+        modifier = modifier.padding(all = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = label)
+        Text(
+            text = label,
+            modifier = modifier.padding(end = 8.dp),
+            fontWeight = FontWeight.SemiBold
+        )
         TextField(
             value = value,
             onValueChange = { value = it },
@@ -92,8 +108,15 @@ fun SolutionComponent(label: String, modifier: Modifier = Modifier) {
 @Composable
 fun CoefficientInput(variable: String, modifier: Modifier = Modifier) {
     var amount by remember { mutableStateOf("0") }
-    Row(modifier = modifier) {
-        Text(text = "$variable:")
+    Row(
+        modifier = modifier.padding(all = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "$variable:",
+            modifier = modifier.padding(end = 8.dp),
+            fontWeight = FontWeight.SemiBold
+        )
         TextField(
             value = amount,
             onValueChange = { amount = it },
@@ -105,7 +128,7 @@ fun CoefficientInput(variable: String, modifier: Modifier = Modifier) {
 @Composable
 fun Header(title: String, modifier: Modifier = Modifier) {
     Text(
-        text=title,
+        text = title,
         modifier = modifier,
         fontWeight = FontWeight.Bold,
         fontFamily = FontFamily.SansSerif,
@@ -114,11 +137,11 @@ fun Header(title: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun QuadraticEquation() {
+fun QuadraticEquation(modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = R.drawable.ic_quadratic_equation),
         contentDescription = "Ecuación cuadrática: ax² + bx + c = 0",
-        modifier = Modifier.size(width = 200.dp, height = 50.dp),
+        modifier = modifier.size(width = 300.dp, height = 100.dp),
         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
     )
 }
