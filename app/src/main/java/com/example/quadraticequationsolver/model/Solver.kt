@@ -4,17 +4,15 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
 
-class Solver(a: Int, b: Int, c: Int) {
-    private val coefficients: Coefficients = Coefficients(a, b, c)
-    val result: Result = Solve()
-    private fun Solve(): Result {
+class Solver {
+    fun solve(a: Float, b: Float, c: Float): Result {
         var irrational = 0f
-        val rational: Float = -coefficients.linear / (2f * coefficients.quadratic)
+        val rational: Float = -b / (2 * a)
         var rationalRest = 0f
-        if (SolveRadicand() < 0f) {
-            irrational = sqrt(abs(SolveRadicand())) / (2f * coefficients.quadratic)
+        if (solveRadicand(a, b, c) < 0f) {
+            irrational = sqrt(abs(solveRadicand(a, b, c))) / (2 * a)
         } else {
-            rationalRest = sqrt(SolveRadicand()) / (2f * coefficients.quadratic)
+            rationalRest = sqrt(solveRadicand(a, b, c)) / (2 * a)
         }
         return Result(
             x1 = Solution(
@@ -27,5 +25,5 @@ class Solver(a: Int, b: Int, c: Int) {
             )
         )
     }
-    private fun SolveRadicand(): Float = coefficients.linear.toFloat().pow(2) - 4 * coefficients.quadratic * coefficients.constant
+    private fun solveRadicand(a: Float, b: Float, c: Float): Float = b.pow(2) - 4 * a * c
 }

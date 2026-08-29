@@ -1,7 +1,7 @@
 package com.example.quadraticequationsolver.model
 
 data class Coefficients(
-    val quadratic: Int,
-    val linear: Int,
-    val constant: Int
+    val quadratic: Float = 0f,
+    val linear: Float = 0f,
+    val constant: Float = 0f
 )
